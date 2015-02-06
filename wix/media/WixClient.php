@@ -37,6 +37,27 @@ class WixClient {
 		else return false;
 	}
 
+	public function uploadImage($file_path) {
+		return $this->uploadFile($file_path, self::WIX_MEDIA_IMAGE_UPLOAD_URL, 'picture');
+	}
+
+	private function uploadFile($file_path, $url_endpoint, $media_type) {
+		if (!file_exists($file_path) || !is_file($file_path)) return false;
+		
+		$url = $this->getUploadUrl($url_endpoint);
+		$headers = $this->getAuth()->getAuthorizationHeader();
+		$file_path = realpath($file_path);
+		$post_fields['media_type'] = $media_type;
+		$post_fields['file'] = curl_file_create($file_path);
+		$answer = WixHttpUtils::curl($url, $headers, $post_fields, 'POST');
+
+		if ($answer['http_code'] === 200) {
+			$result = json_decode($answer['result']);
+			return $result[0];
+		}
+		else return false;
+	}
+
 	private function getUploadUrl($url_endpoint) {
 		$headers = $this->getAuth()->getAuthorizationHeader();
 		$answer = WixHttpUtils::curl($url_endpoint, $headers);
@@ -44,25 +65,4 @@ class WixClient {
 		if ($answer['http_code'] === 200) return json_decode($answer['result'])->upload_url;
 		else return false;
 	}
-
-	public function uploadImage($file_path) {
-		if (!file_exists($file_path) || !is_file($file_path)) return false;
-		
-		$image_info = getimagesize($file_path);
-		return $this->uploadFile($file_path, self::WIX_MEDIA_IMAGE_UPLOAD_URL, 'picture', $image_info['mime']);
-	}
-
-	private function uploadFile($file_path, $url_endpoint, $media_type, $mime) {
-		$url = $this->getUploadUrl($url_endpoint);
-		$headers = $this->getAuth()->getAuthorizationHeader();
-		$file_path = realpath($file_path);
-		$filename = pathinfo($file_path, PATHINFO_BASENAME);
-		$post_fields['media_type'] = $media_type;
-		$post_fields['file'] = curl_file_create($filename, $mime, $filename);
-		$answer = WixHttpUtils::curl($url, $headers, $post_fields, 'POST');
-
-		if ($answer['http_code'] === 200) return json_decode($answer['result']);
-		else return false;
-	}
-
 }
