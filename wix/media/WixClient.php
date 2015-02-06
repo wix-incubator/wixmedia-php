@@ -34,16 +34,17 @@ class WixClient {
 		$headers = $this->getAuth()->getAuthorizationHeader();
 		$answer = WixHttpUtils::curl($url, $headers);
 		if ($answer['http_code'] === 200) return json_decode($answer['result']);
-		else return false;
+		else return;
 	}
 
 	public function uploadImage($file_path) {
-		return $this->uploadFile($file_path, self::WIX_MEDIA_IMAGE_UPLOAD_URL, 'picture');
+		$meta = $this->uploadFile($file_path, self::WIX_MEDIA_IMAGE_UPLOAD_URL, 'picture');
+		if ($meta) return new WixImage($meta->file_url, self::IMAGE_SERVICE_HOST, $this);
 	}
 
 	private function uploadFile($file_path, $url_endpoint, $media_type) {
-		if (!file_exists($file_path) || !is_file($file_path)) return false;
-		
+		if (!file_exists($file_path) || !is_file($file_path)) return;
+
 		$url = $this->getUploadUrl($url_endpoint);
 		$headers = $this->getAuth()->getAuthorizationHeader();
 		$file_path = realpath($file_path);
@@ -55,7 +56,7 @@ class WixClient {
 			$result = json_decode($answer['result']);
 			return $result[0];
 		}
-		else return false;
+		else return;
 	}
 
 	private function getUploadUrl($url_endpoint) {
@@ -63,6 +64,6 @@ class WixClient {
 		$answer = WixHttpUtils::curl($url_endpoint, $headers);
 
 		if ($answer['http_code'] === 200) return json_decode($answer['result'])->upload_url;
-		else return false;
+		else return;
 	}
 }
