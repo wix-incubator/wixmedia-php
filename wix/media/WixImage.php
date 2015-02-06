@@ -71,12 +71,12 @@ class WixImage extends WixMedia {
 	}
 
 	public function getUrl() {
-		if ($command = $this->buildCommand()) {
+		if ($this->trasform) {
 			$url = sprintf("http://%s/%s/%s/%s/%s", 
 				$this->service_host, 
 				pathinfo($this->id, PATHINFO_DIRNAME),
 				self::VERSION,
-				$command,
+				$command = $this->buildCommand(),
 				pathinfo($this->id, PATHINFO_BASENAME)
 			);
 		} else {
@@ -94,7 +94,7 @@ class WixImage extends WixMedia {
 		$this->trasform['canvas'] = array(
 			'w'		=> (int)$width,
 			'h'		=> (int)$height,
-			'al'	=> $this->ALIGN_OP[$alignment],
+			'al'	=> isset($this->ALIGN_OP[$alignment]) ? $this->ALIGN_OP[$alignment] : 'center',
 			'c'		=> $color,
 		);
 		return $this;
@@ -104,8 +104,8 @@ class WixImage extends WixMedia {
 		$this->trasform['fill'] = array(
 			'w'		=> (int)$width,
 			'h'		=> (int)$height,
-			'rf'	=> (int)$this->RESIZE_FILTER[$resize_filter],
-			'al'	=> $this->ALIGN_OP[$alignment],
+			'rf'	=> isset($this->RESIZE_FILTER[$resize_filter]) ? $this->RESIZE_FILTER[$resize_filter] : 'LanczosFilter',
+			'al'	=> isset($this->ALIGN_OP[$alignment]) ? $this->ALIGN_OP[$alignment] : 'center',
 		);
 		return $this;
 	}
@@ -114,7 +114,7 @@ class WixImage extends WixMedia {
 		$this->trasform['fit'] = array(
 			'w'		=> (int)$width,
 			'h'		=> (int)$height,
-			'rf'	=> (int)$this->RESIZE_FILTER[$resize_filter],
+			'rf'	=> isset($this->RESIZE_FILTER[$resize_filter]) ? $this->RESIZE_FILTER[$resize_filter] : 'LanczosFilter',
 		);
 		return $this;
 	}
@@ -182,19 +182,22 @@ class WixImage extends WixMedia {
 	}
 
 	public function unsharp($radius = 0.5, $amount = 0.2, $threshold = 0.0) {
-		$radius = number_format ($radius, 1);
-		$amount = number_format ($amount, 1);
-		$threshold = number_format ($threshold, 1);
+		$radius = number_format ($radius, 2);
+		$amount = number_format ($amount, 2);
+		$threshold = number_format ($threshold, 2);
 		$this->params['usm'] = array($radius, $amount, $threshold);
 		return $this;
 	}
 
 	private function buildCommand() {
 		$command = '';
+		$param_glue = ',';
+		$transform_glue = '/';
 		foreach ($this->trasform as $transformation => $trans_values) {
-			$command .= $transformation .'/'.$this->glueCommandParams($trans_values);
+			$command .= $transformation . $transform_glue . $this->glueCommandParams($trans_values, $param_glue) . $transform_glue;
 		}
-		if($this->params) $command .= ','.$this->glueCommandParams($this->params);
+		$command = substr($command, 0, -1);
+		if ($this->params) $command .= $param_glue . $this->glueCommandParams($this->params, $param_glue); 
 		return $command;
 	}
 

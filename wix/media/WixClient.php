@@ -43,7 +43,10 @@ class WixClient {
 	}
 
 	private function uploadFile($file_path, $url_endpoint, $media_type) {
-		if (!file_exists($file_path) || !is_file($file_path)) return;
+		if (!file_exists($file_path) || !is_file($file_path)) {
+			error_log("WixClient->uploadFile, file: $file_path does not exist");
+			return;
+		}
 
 		$url = $this->getUploadUrl($url_endpoint);
 		$headers = $this->getAuth()->getAuthorizationHeader();

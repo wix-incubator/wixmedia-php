@@ -7,13 +7,18 @@ $api_key = 'YOUR_API_KEY';
 $secret = 'YOUR_API_SECRET';
 
 $client = new WixClient($api_key, $secret);
-$image_id = 'wixmedia-samples/images/cdf1ba9ec9554baca147db1cb6e011ec/parrot.jpg';
-$image = $client->getImageById($image_id);
 
-// !!!UNCOMMENT TO TEST FILE UPLOADING!!!
-/*$upload_meta = $client->uploadImage('test.jpg');
-echo '<pre>'.print_r($uploaded_meta, true).'</pre>';*/
-	
+if ($image = $client->uploadImage('test.jpg')) {
+	echo "The image was successfully uploaded!\n";
+	echo $image->getId();
+} else {
+	echo "An error occurred, check your php log file for more information.\n";
+	echo "Trying to use stock image...\n";
+	$image_id = 'wixmedia-samples/images/cdf1ba9ec9554baca147db1cb6e011ec/parrot.jpg';
+	$image = $client->getImageById($image_id);
+	echo $image->getId();
+	echo "\n";
+}
 	
 echo $image->canvas(400, 800, 'top', 'cccccc')->getUrl();
 echo '<br>';

@@ -27,11 +27,10 @@ class WixHttpUtils {
 		curl_setopt($ch, 155 , 15000); // CURLOPT_TIMEOUT_MS до 15 секунд ждем ответа сервера
 		$res = curl_exec($ch);
 		$ch_error = curl_error($ch);
-		echo '<pre>'.print_r($ch_error, true).'</pre>';
 		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		curl_close($ch);
-
-		return array('http_code' => $http_code, 'result' => $res);
+		if ($http_code !== 200 && $http_code !== 404) error_log("WixHttpUtils::curl, http_code: $http_code, curl_error: $ch_error");
+		return array('http_code' => $http_code, 'error_message' => $ch_error, 'result' => $res);
 	}
 }
 
