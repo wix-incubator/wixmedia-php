@@ -14,6 +14,7 @@ class WixClient {
 	const WIX_MEDIA_VIDEO_UPLOAD_URL 			= 'http://mediacloud.wix.com/files/video/upload/url';
 	const WIX_MEDIA_AUTH_TOKEN_URL   			= 'http://mediacloud.wix.com/auth/token';
 	const WIX_MEDIA_GET_FILE_INFO_URL_PREFIX 	= 'http://mediacloud.wix.com/files/';
+	const WIX_MEDIA_COLLECTION_URL			 	= 'http://collections.wix.com/collections';
 
 	private $auth;
 
@@ -33,6 +34,13 @@ class WixClient {
 		$url = self::WIX_MEDIA_GET_FILE_INFO_URL_PREFIX . $metadata_id;
 		$headers = $this->getAuth()->getAuthorizationHeader();
 		$answer = WixHttpUtils::curl($url, $headers);
+		if ($answer['http_code'] === 200) return json_decode($answer['result']);
+		else return;
+	}
+
+	public function getCollections($type = 'image') {
+		$headers = $this->getAuth()->getAuthorizationHeader();
+		$answer = WixHttpUtils::curl(self::WIX_MEDIA_COLLECTION_URL, $headers, array('type' => $type));
 		if ($answer['http_code'] === 200) return json_decode($answer['result']);
 		else return;
 	}

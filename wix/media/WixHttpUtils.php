@@ -4,8 +4,10 @@ class WixHttpUtils {
 
 	static public function curl($url, $headers = array(), $params = array(), $method = 'GET') {
 		$ch = curl_init(); //инициализация сеанса
-		curl_setopt($ch, CURLOPT_URL, $url); //урл сайта к которому обращаемся
 		switch ($method) {
+			case 'GET':
+				if ($params) $url .= '?'.http_build_query($params);
+				break;
 			case 'DELETE':
 			case 'OPTION':
 				curl_setopt($ch, CURLOPT_CUSTOMREQUEST , $method);
@@ -15,6 +17,7 @@ class WixHttpUtils {
 				curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 				break;
 		}
+		curl_setopt($ch, CURLOPT_URL, $url); //урл сайта к которому обращаемся
 		if (is_array($headers) && count($headers)) {
 			foreach ($headers as $key => $value) {
 				$curl_headers[] = $key.':'.$value;
